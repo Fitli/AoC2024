@@ -76,29 +76,68 @@ procedure Day06 is
         return False;
     end Is_Outside_Area;
 
-    procedure Part1 is
+    procedure Walk(Walls_Used : Coordinates_Sets.Set;cycles: out Boolean; Cnt_Visited: out Count_Type) is
         Visited : Coordinates_Sets.Set;
+        Visited_Dirs : array (Dir_Index) of Coordinates_Sets.Set;
         Curr_Position : Coordinates := Initial_Position;
         Curr_Dir_Idx : Dir_Index := 0;
         Next_Position : Coordinates;
     begin
         while True loop
+            cycles := False;
+            if Visited_Dirs(Curr_Dir_Idx).Contains(Curr_Position) then
+                cycles := True;
+                return;
+            end if;
             Visited.Include(Curr_Position);
+            Visited_Dirs(Curr_Dir_Idx).Include(Curr_Position);
             Next_Position := Move_Position(Curr_Position, Dirs(Curr_Dir_Idx));
-            if Walls.Contains(Next_Position) then
+            if Walls_Used.Contains(Next_Position) then
                 Curr_Dir_Idx := Curr_Dir_Idx + 1;
             elsif Is_Outside_Area(Next_Position) then
-                Ada.Text_IO.Put_Line(Count_Type'Image(Visited.Length));
+                Cnt_Visited := Visited.Length;
                 return;
             else
                 Curr_Position := Next_Position;
             end if;
         end loop;
-    end Part1;
-        
+    end Walk;
 
+    procedure part1 is
+        cycles:Boolean;
+        Visited:Count_Type;
+    begin
+        Walk(Walls, cycles, Visited);
+        Ada.Text_IO.Put_Line(Count_Type'Image(Visited));
+    end part1;
+
+    procedure part2 is
+        Possible_Obstacles : Coordinates_Sets.Set;
+    begin
+        for X in 1..Cols loop
+            for Y in 1..Rows loop
+                declare
+                    Obstacle : Coordinates := (X, Y);
+                    Walls_Copy : Coordinates_Sets.Set := Walls;
+                    Cycles : Boolean;
+                    Visited:Count_Type;
+                begin
+                    if not Walls.Contains(Obstacle) then
+                        Walls_Copy.Include(Obstacle);
+                        Walk(Walls_Copy, Cycles, Visited);
+                        if Cycles then
+                            Possible_Obstacles.Include(Obstacle);
+                        end if;
+                    end if;
+                end;
+            end loop;
+            Ada.Text_IO.Put_Line(Integer'Image(X) & "/" & Integer'Image(Cols));
+        end loop;
+        Ada.Text_IO.Put_Line(Count_Type'Image(Possible_Obstacles.Length));
+    end part2;
 
 begin
-    Load_Input("inputs/test06.txt");
+    Load_Input("inputs/input06.txt");
     Part1;
+    Part2;
 end Day06;
