@@ -57,14 +57,6 @@ procedure Day07 is
         return P;
     end;
 
-    function Is_Suffix(Result: Long_Integer; Member: Long_integer) return Boolean is
-        Result_Image : String := Trim(Long_Integer'Image(Result), Left);
-        Member_Image : String := Trim(Long_Integer'Image(Member), Left);
-        Cropped_Result : String := Tail(Result_Image, Member_Image'Length);
-    begin
-        return Member_Image = Cropped_Result;
-    end Is_Suffix;
-
     function Can_Be_True(Eq : Equation; Is_Part_2:Boolean) return Boolean is
     begin
         if Eq.Members.Length = 1 then
@@ -97,7 +89,6 @@ procedure Day07 is
                 end if;
             end if;
         end;
-                
         return False;
     end Can_Be_True;
 
