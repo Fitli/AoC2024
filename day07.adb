@@ -48,13 +48,22 @@ procedure Day07 is
         end loop;
     end Load_Input;
 
-    function Concat(First: Long_Integer; Second: Long_integer) return Long_Integer is
-        First_Image : String := Trim(Long_Integer'Image(First), Left);
-        Second_Image : String := Trim(Long_Integer'Image(Second), Left);
+    function Bigger_Pow_Of_10(Num : Long_Integer) return Long_Integer is
+        P : Long_Integer := 10;
     begin
-        return Long_Integer'Value( First_Image & Second_Image);
-    end Concat;
-        
+        while P <= Num loop
+            P := P*10;
+        end loop;
+        return P;
+    end;
+
+    function Is_Suffix(Result: Long_Integer; Member: Long_integer) return Boolean is
+        Result_Image : String := Trim(Long_Integer'Image(Result), Left);
+        Member_Image : String := Trim(Long_Integer'Image(Member), Left);
+        Cropped_Result : String := Tail(Result_Image, Member_Image'Length);
+    begin
+        return Member_Image = Cropped_Result;
+    end Is_Suffix;
 
     function Can_Be_True(Eq : Equation; Is_Part_2:Boolean) return Boolean is
     begin
@@ -65,31 +74,26 @@ procedure Day07 is
                 return False;
             end if;
         end if;
-        if Eq.Members.First_Element > Eq.Result then
-            return False;
-        end if;
         declare 
-            Sum_Parc_Result : Integer_Vectors.Vector := Eq.Members;
-            Mul_Parc_Result : Integer_Vectors.Vector := Eq.Members;
-            Concat_Parc_Result : Integer_Vectors.Vector := Eq.Members;
-            First : Long_Integer := Eq.Members.First_Element;
-            Second : Long_Integer := Eq.Members.Element(Eq.Members.First_Index+1);
+            Prefix : Integer_Vectors.Vector := Eq.Members;
+            Last : Long_Integer := Eq.Members.Last_Element;
         begin
-            Sum_Parc_Result.Delete_First(2);
-            Sum_Parc_Result.Prepend(First+Second);
-            if Can_Be_True((Eq.Result, Sum_Parc_Result), Is_Part_2) then
-                return True;
+            Prefix.Delete_Last;
+            if Last < Eq.Result then
+                if Can_Be_True((Eq.Result - Last, Prefix), Is_Part_2) then
+                    return True;
+                end if;
             end if;
-            Mul_Parc_Result.Delete_First(2);
-            Mul_Parc_Result.Prepend(First*Second);
-            if Can_Be_True((Eq.Result, Mul_Parc_Result), Is_Part_2) then
-                return True;
+            if Eq.Result rem Last = 0 then
+                if Can_Be_True((Eq.Result / Last, Prefix), Is_Part_2) then
+                    return True;
+                end if;
             end if;
             if Is_Part_2 then
-                Concat_Parc_Result.Delete_First(2);
-                Concat_Parc_Result.Prepend(Concat(First,Second));
-                if Can_Be_True((Eq.Result, Concat_Parc_Result), Is_Part_2) then
-                    return True;
+                if Eq.Result /= Last and Eq.Result rem Bigger_Pow_Of_10(Last) = Last then
+                    if Can_Be_True((Eq.Result / Bigger_Pow_Of_10(Last), Prefix), Is_Part_2) then
+                        return True;
+                    end if;
                 end if;
             end if;
         end;
